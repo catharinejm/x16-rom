@@ -7,6 +7,7 @@
 .feature labels_without_colons
 
 .import dfltn, dflto, kbd_scan, clock_update, cinv, cbinv
+.import jsrfar
 .export key
 
 .segment "IRQ"
@@ -30,7 +31,11 @@
 .macro irq_impl
 	jsr ps2data_fetch
 	jsr mouse_scan  ;scan mouse (do this first to avoid sprite tearing)
-    jsr serialkbd_fetch
+
+    jsr jsrfar
+    .word serialkbd_fetch
+    .byte BANK_KERNEXT
+
 	jsr joystick_scan
 	jsr clock_update
 	jsr cursor_blink

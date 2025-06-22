@@ -5,7 +5,7 @@
 
 .export serialkbd_init, serialkbd_fetch
 
-.import fetch_key_code, ps2data_kbd, ps2data_kbd_count
+.import ps2data_kbd, ps2data_kbd_count
 
 ;; Named from the X16's perspective. E.g. RTSPIN is connected to CTS on the FTDI
 RXPIN  = $01 ;; PB0
@@ -229,9 +229,15 @@ read_byte:
 serialkbd_fetch:
     KVARS_START
     jsr fill_buffer
-    jsr fetch_key_code
-    bne @done ;; let real PS/2 keyboard take precedence
 
+    ;; let real PS/2 keyboard take precedence
+    lda ps2data_kbd_count
+    beq @use_serial
+
+    lda ps2data_kbd
+    bne @done
+
+@use_serial:
     jsr read_byte
     beq @done ;; No uart key
 

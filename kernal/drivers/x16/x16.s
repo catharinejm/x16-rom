@@ -40,7 +40,10 @@ ioinit:
 	jsr serial_init
 	jsr entropy_init
 	jsr clklo       ;release the clock line
-    jsr serialkbd_init
+
+    jsr jsrfar
+    .word serialkbd_init
+    .byte BANK_KERNEXT
 	; fallthrough
 
 ;---------------------------------------------------------------
