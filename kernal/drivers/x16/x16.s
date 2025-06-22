@@ -41,9 +41,7 @@ ioinit:
 	jsr entropy_init
 	jsr clklo       ;release the clock line
 
-    jsr jsrfar
-    .word serialkbd_init
-    .byte BANK_KERNEXT
+    jsr serialkbd_init
 	; fallthrough
 
 ;---------------------------------------------------------------

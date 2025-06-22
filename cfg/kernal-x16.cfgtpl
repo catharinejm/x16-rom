@@ -5,8 +5,6 @@ MEMORY {
 	KERNAL:   start = $C010, size = $3E98, fill=yes, fillval=$AA;
 	JMPTBL:   start = $FEA8, size = $0152, fill=yes, fillval=$AA;
 	VECTORS:  start = $FFFA, size = $0006, fill=yes, fillval=$AA;
-    KEXTSIG:  start = $C000, size = $0010, fill=yes, fillval=$00;
-    KERNALEXT:start = $C010, size = $4000, fill=yes, fillval=$AA;
 }
 
 SEGMENTS {
@@ -35,6 +33,7 @@ SEGMENTS {
 	PS2:      load = KERNAL,   type = ro;
 	PS2KBD:   load = KERNAL,   type = ro;
 	PS2MOUSE: load = KERNAL,   type = ro;
+    SERIALKBD:load = KERNAL, type = ro;
 	SERIAL:   load = KERNAL,   type = ro;
 	LZSA:     load = KERNAL,   type = ro;
 	CHANNEL:  load = KERNAL,   type = ro;
@@ -78,6 +77,4 @@ SEGMENTS {
 	VECB0:    load = KERNAL,   run = VECB0, type = ro, define = yes;
 	JMPTBL:   load = JMPTBL,   type = ro;
 	VECTORS:  load = VECTORS,  type = ro;
-    KEXTSIG:  load = KEXTSIG,  type = ro;
-    SERIALKBD: load = KERNALEXT,  type = ro;
 }

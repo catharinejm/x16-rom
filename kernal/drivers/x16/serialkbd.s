@@ -6,7 +6,7 @@
 
 .export serialkbd_init, serialkbd_fetch
 
-.import ps2data_kbd, ps2data_kbd_count
+.import ps2data_kbd, ps2data_kbd_count, jsrfar
 
 ;; Named from the X16's perspective. E.g. RTSPIN is connected to CTS on the FTDI
 RXPIN  = $01 ;; PB0
@@ -39,14 +39,12 @@ WTPTR: .byte 0
 RDPTR: .byte 0
 BUFFER: .res 16
 
-.segment "KEXTSIG"
-.byte "SERIALKBD"
-
 .segment "SERIALKBD"
 
 serialkbd_init:
-    KVARS_START
-
+    ; KVARS_START_TRASH_A_NZ
+    php
+    sei
     stz RDPTR
     stz WTPTR
 
@@ -62,9 +60,11 @@ serialkbd_init:
     stz VIA2::pcr
 
 @done:
-    KVARS_END
+    ; KVARS_END_TRASH_A_NZ
+    plp
     rts
 
+;.segment "SERIALKBD2"
 ;; TODO think about how to handle zero-page addrs, scratch vs saved, maybe some 16-bit regs
 SPACELEFT = $22
 fill_buffer:
@@ -74,7 +74,14 @@ fill_buffer:
     bne :+
     rts
 :   sta VIA2::ifr ;; Clear CTS IRQ flag
+    ; jsr jsrfar
+    ; .word fill_buffer_aux
+    ; .byte BANK_KERNEXT
+    ; rts
 
+; .pushseg
+; .segment "SERIALKBD2"
+fill_buffer_aux:
     ; php
     ; phy
     ; phx
@@ -116,12 +123,12 @@ fill_buffer:
 
     ;; 11 cycles may have passed between RX going low and arriving here
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
+    ; nop
+    ; nop
+    ; nop
+    ; nop
+    ; nop
+    ; nop
 
     ;; Now we're 12-23 cycles into the start bit
 
@@ -200,6 +207,7 @@ fill_buffer:
     ; plp
     rts
 
+; .res 5 ;; push _spin_wait into next page
 ;; Waits (Y-1)*5 cycles + 10
 _spin_wait:
     dey           ;; 2c
@@ -207,10 +215,12 @@ _spin_wait:
 .assert >* = >_spin_wait, error, "spin_wait across page"
     rts           ;; 6c
 
+; .popseg
+
 read_byte:
-    php
-    phx
-    sei ;; Disable interrupts so RDPTR and WTPTR don't change during execution
+    ; php
+    ; phx
+    ; sei ;; Disable interrupts so RDPTR and WTPTR don't change during execution
     ldx RDPTR
     cpx WTPTR
     bne :+
@@ -224,14 +234,14 @@ read_byte:
     sta RDPTR
     txa
 @done:
-    plx
-    plp
-    cmp #0
+    ; plx
+    ; plp
+    ; cmp #0
     clc
     rts
 
 serialkbd_fetch:
-    KVARS_START
+    KVARS_START_TRASH_X_NZ
     jsr fill_buffer
 
     ;; let real PS/2 keyboard take precedence
@@ -249,5 +259,5 @@ serialkbd_fetch:
     inc ps2data_kbd_count
 
 @done:
-    KVARS_END
+    KVARS_END_TRASH_X_NZ
     rts

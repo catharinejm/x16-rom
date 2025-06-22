@@ -321,8 +321,7 @@ BANK_BINS = \
 	$(BUILD_DIR)/util.bin \
 	$(BUILD_DIR)/bannex.bin \
 	$(BUILD_DIR)/x16edit-rom.bin \
-	$(BUILD_DIR)/basload-rom.bin \
-	$(BUILD_DIR)/kernalext.bin
+	$(BUILD_DIR)/basload-rom.bin
 
 ROM_LABELS=$(BUILD_DIR)/rom_labels.h
 ROM_LST=$(BUILD_DIR)/rom_lst.h
@@ -373,15 +372,12 @@ $(BUILD_DIR)/%.o: %.s
 
 # TODO: Need a way to control relist generation; don't try to do it if lst files haven't been generated!
 # Bank 0 : KERNAL
-$(BUILD_DIR)/kernal-combined.bin: $(GIT_SIGNATURE) $(KERNAL_OBJS) $(KERNAL_DEPS) $(CFG_DIR)/kernal-x16.cfg
+$(BUILD_DIR)/kernal.bin: $(GIT_SIGNATURE) $(KERNAL_OBJS) $(KERNAL_DEPS) $(CFG_DIR)/kernal-x16.cfg
 	@mkdir -p $$(dirname $@)
 	$(LD) -C $(CFG_DIR)/kernal-x16.cfg $(KERNAL_OBJS) -o $@ -m $(BUILD_DIR)/kernal.map -Ln $(BUILD_DIR)/kernal.sym \
 	`${BUILD_DIR}/../../findsymbols ${BUILD_DIR}/charset.sym __CHARPET_LOAD__ __CHARPET2_LOAD__ __CHARLAE_LOAD__ __CHARLAE2_LOAD__` \
 	`${BUILD_DIR}/../../findsymbols ${BUILD_DIR}/charset.sym __CHARKAT_LOAD__ __CHARISO_LOAD__ __CHARISO2_LOAD__ __CHARCYR_LOAD__` \
 	`${BUILD_DIR}/../../findsymbols ${BUILD_DIR}/charset.sym __CHARCYR2_LOAD__ __CHARANSI_LOAD__`
-
-$(BUILD_DIR)/kernal.bin: $(BUILD_DIR)/kernal-combined.bin
-	head -c$$((1024 * 16)) $< > $@
 	./scripts/relist.py $(BUILD_DIR)/kernal.map $(BUILD_DIR)/kernal
 
 # Bank 1 : KEYMAP
@@ -477,10 +473,6 @@ $(BUILD_DIR)/basload-rom.bin: $(BASLOAD_DEPS)
 	(cd basload && make clean && make)
 	cp basload/build/basload-rom.bin $(BUILD_DIR)/basload-rom.bin
 	./scripts/trace_info.py 15 basload/conf/basload-rom.cfg basload/build/basload-rom.lst $(BUILD_DIR)/basload-rom.rlst $(BUILD_DIR)/basload_labels.h
-
-# Bank 10: KERNALEXT
-$(BUILD_DIR)/kernalext.bin: $(BUILD_DIR)/kernal-combined.bin
-	tail -c+$$((16 * 1024 + 1)) $< > $@
 
 $(BUILD_DIR)/rom_labels.h: $(BANK_BINS)
 	./scripts/symbolize.sh 0 build/x16/kernal.sym   > $@

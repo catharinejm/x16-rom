@@ -14,7 +14,6 @@ BANK_UTIL    = $0B
 BANK_BANNEX  = $0C
 BANK_X16EDIT = $0D ; Occupies two banks!
 BANK_BASLOAD = $0F
-BANK_KERNEXT = $10
 
 cbdos_flags= $0268
 status     = $0287 ; channel: status byte
