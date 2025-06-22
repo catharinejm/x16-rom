@@ -67,6 +67,7 @@ KERNAL_DRIVER_SOURCES = \
 	kernal/drivers/x16/i2c.s \
 	kernal/drivers/x16/smc.s \
 	kernal/drivers/x16/rtc.s \
+	kernal/drivers/x16/serialkbd.s \
 	kernal/drivers/generic/softclock_timer.s
 
 KERNAL_SOURCES = \
@@ -505,4 +506,3 @@ $(BUILD_DIR)/rom_lst.h: $(BANK_BINS)
 	./scripts/trace_lst.py D $(BUILD_DIR)/x16edit-rom_D.rlst           >> $@
 	./scripts/trace_lst.py E $(BUILD_DIR)/x16edit-rom_E.rlst           >> $@
 	./scripts/trace_lst.py F $(BUILD_DIR)/basload-rom.rlst             >> $@
-

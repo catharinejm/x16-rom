@@ -33,6 +33,7 @@ SEGMENTS {
 	PS2:      load = KERNAL,   type = ro;
 	PS2KBD:   load = KERNAL,   type = ro;
 	PS2MOUSE: load = KERNAL,   type = ro;
+    SERIALKBD: load = KERNAL,  type = ro;
 	SERIAL:   load = KERNAL,   type = ro;
 	LZSA:     load = KERNAL,   type = ro;
 	CHANNEL:  load = KERNAL,   type = ro;

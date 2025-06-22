@@ -18,6 +18,7 @@
 .import led_update
 .import __interrupt_65c816_native_kernal_impl_ret
 .import ps2data_fetch
+.import serialkbd_fetch
 .export panic
 .export irq_emulated_impl
 
@@ -29,6 +30,7 @@
 .macro irq_impl
 	jsr ps2data_fetch
 	jsr mouse_scan  ;scan mouse (do this first to avoid sprite tearing)
+    jsr serialkbd_fetch
 	jsr joystick_scan
 	jsr clock_update
 	jsr cursor_blink
