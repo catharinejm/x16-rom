@@ -6,7 +6,7 @@
 
 .export serialkbd_init, serialkbd_fetch
 
-.import ps2data_kbd, ps2data_kbd_count, jsrfar
+.import ps2data_kbd, ps2data_kbd_count
 
 ;; Named from the X16's perspective. E.g. RTSPIN is connected to CTS on the FTDI
 RXPIN  = $01 ;; PB0
@@ -64,7 +64,6 @@ serialkbd_init:
     plp
     rts
 
-;.segment "SERIALKBD2"
 ;; TODO think about how to handle zero-page addrs, scratch vs saved, maybe some 16-bit regs
 SPACELEFT = $22
 fill_buffer:
@@ -74,14 +73,7 @@ fill_buffer:
     bne :+
     rts
 :   sta VIA2::ifr ;; Clear CTS IRQ flag
-    ; jsr jsrfar
-    ; .word fill_buffer_aux
-    ; .byte BANK_KERNEXT
-    ; rts
 
-; .pushseg
-; .segment "SERIALKBD2"
-fill_buffer_aux:
     ; php
     ; phy
     ; phx
@@ -214,8 +206,6 @@ _spin_wait:
     bne _spin_wait ;; 3c (taken) 2c (not taken)
 .assert >* = >_spin_wait, error, "spin_wait across page"
     rts           ;; 6c
-
-; .popseg
 
 read_byte:
     ; php

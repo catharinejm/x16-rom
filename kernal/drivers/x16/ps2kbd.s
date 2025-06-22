@@ -33,7 +33,6 @@
 .export kbd_config, kbd_scan, receive_scancode_resume, keymap, ps2kbd_typematic
 .export kbd_leds
 .export tpmflg, tpmcache, ledstate
-.export fetch_key_code
 
 .import extapi
 
