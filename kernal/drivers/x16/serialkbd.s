@@ -1,3 +1,4 @@
+;; -*- no-whitespace-cleanup: () -*-
 .setcpu "65C02"
 
 .include "io.inc"
@@ -37,6 +38,9 @@ CTSIRQ = $10 ;; CB1 IRQ flag bit
 WTPTR: .byte 0
 RDPTR: .byte 0
 BUFFER: .res 16
+
+.segment "KEXTSIG"
+.byte "SERIALKBD"
 
 .segment "SERIALKBD"
 
@@ -80,9 +84,9 @@ fill_buffer:
     ; sei ;; disable interrupts
 
 
-;; TODO not necessary to php or sei when called from irq handler, but
-;; can't be avoided if this procedure could be called anywhere. Unless
-;; maybe interrupts disabled is a prerequiste for calling?
+    ;; TODO not necessary to php or sei when called from irq handler, but
+    ;; can't be avoided if this procedure could be called anywhere. Unless
+    ;; maybe interrupts disabled is a prerequiste for calling?
 
     ldx WTPTR ;; X contains WTPTR throughout, and must be set before jumping to @return
 
@@ -126,8 +130,8 @@ fill_buffer:
 
     ;; 18-29 cycles in
 
-;; Pulse RTS again if we can take another bit after this
-;; Doing it early so there's no pause between bytes from the FTDI
+    ;; Pulse RTS again if we can take another bit after this
+    ;; Doing it early so there's no pause between bytes from the FTDI
 
     ;; 22c if there's space for another byte, 23c if not
     lda #RTSPIN      ;; 2c
@@ -153,8 +157,8 @@ fill_buffer:
     lda #RXPIN      ;; 2c
 .endmacro
 
-;; Bit 0 is 22/23 cycles into the next wait
-;; but only spin 43cyc more (65 total, not 70) b/c there's a ~10 cycle drift as we read
+    ;; Bit 0 is 22/23 cycles into the next wait
+    ;; but only spin 43cyc more (65 total, not 70) b/c there's a ~10 cycle drift as we read
     spin_wait 4 ;; 40c
     lda #RXPIN  ;; 2c
     read_bit    ;; 15c
@@ -164,9 +168,9 @@ fill_buffer:
     spin_wait 7 ;; 55cyc
     ;; 70 cyc
     read_bit    ;; 15cyc
-    ;; 15 cyc into next spin
+;; 15 cyc into next spin
 .endrepeat
-    ;; 8 cycle drift
+;; 8 cycle drift
 
     inx            ;; 2c
     txa            ;; 2c
