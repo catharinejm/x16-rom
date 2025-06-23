@@ -198,7 +198,8 @@ serialkbd_fetch:
     beq @done ;; No uart key
 
     sta ps2data_kbd
-    inc ps2data_kbd_count
+    lda #1
+    sta ps2data_kbd_count
 
 @done:
     KVARS_END

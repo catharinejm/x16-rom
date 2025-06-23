@@ -8,8 +8,6 @@
 
 .export serialkbd_init
 
-.import ps2data_kbd, ps2data_kbd_count
-
 .segment "SERIALKBD"
 
 serialkbd_init:

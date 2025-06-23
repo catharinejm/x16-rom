@@ -31,9 +31,9 @@
 .macro irq_impl
 	jsr ps2data_fetch
 
-    jsr jsrfar
-    .word serialkbd_fetch
-    .byte BANK_KERNEXT
+    ; jsr jsrfar
+    ; .word serialkbd_fetch
+    ; .byte BANK_KERNEXT
 
 	jsr mouse_scan  ;scan mouse (do this first to avoid sprite tearing)
 	jsr joystick_scan
