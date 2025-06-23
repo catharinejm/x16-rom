@@ -32,7 +32,7 @@ _spin_wait:
     nop             ;; 2c
 .endmacro
 
-SPACELEFT = r0
+SPACELEFT := r0
 serialkbd_fill_buffer:
     ;; If the CTS IRQ flag hasn't set, there's no data
     lda #SERIALKBD::CTSIRQ
