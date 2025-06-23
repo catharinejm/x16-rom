@@ -176,6 +176,10 @@ BANNEX_SOURCES= \
 DIAG_SOURCES = \
 	diag/diag.s
 
+KERNEXT_SOURCES = \
+	$(wildcard kernext/*.s) \
+	kernsup/kernsup_kernext.s
+
 GENERIC_DEPS = \
 	inc/kernal.inc \
 	inc/mac.inc \
@@ -185,6 +189,8 @@ GENERIC_DEPS = \
 	inc/jsrfar.inc \
 	inc/regs.inc \
 	inc/65c816.inc \
+	inc/kernext.inc \
+	inc/via2.inc \
 	kernsup/kernsup.inc
 
 KERNAL_DEPS = \
@@ -292,6 +298,10 @@ DIAG_DEPS= \
 	diag/macros.inc \
 	diag/charset.inc \
 
+KERNEXT_DEPS= \
+	$(GENERIC_DEPS) \
+	kernal/drivers/x16/ps2data.s
+
 KERNAL_OBJS  = $(addprefix $(BUILD_DIR)/, $(KERNAL_SOURCES:.s=.o))
 KEYMAP_OBJS  = $(addprefix $(BUILD_DIR)/, $(KEYMAP_SOURCES:.s=.o))
 DOS_OBJS     = $(addprefix $(BUILD_DIR)/, $(DOS_SOURCES:.s=.o))
@@ -305,6 +315,7 @@ AUDIO_OBJS   = $(addprefix $(BUILD_DIR)/, $(AUDIO_SOURCES:.s=.o))
 UTIL_OBJS    = $(addprefix $(BUILD_DIR)/, $(UTIL_SOURCES:.s=.o))
 BANNEX_OBJS  = $(addprefix $(BUILD_DIR)/, $(BANNEX_SOURCES:.s=.o))
 DIAG_OBJS    = $(addprefix $(BUILD_DIR)/, $(DIAG_SOURCES:.s=.o))
+KERNEXT_OBJS = $(addprefix $(BUILD_DIR)/, $(KERNEXT_SOURCES:.s=.o))
 
 BANK_BINS = \
 	$(BUILD_DIR)/kernal.bin \
@@ -321,7 +332,8 @@ BANK_BINS = \
 	$(BUILD_DIR)/util.bin \
 	$(BUILD_DIR)/bannex.bin \
 	$(BUILD_DIR)/x16edit-rom.bin \
-	$(BUILD_DIR)/basload-rom.bin
+	$(BUILD_DIR)/basload-rom.bin \
+	$(BUILD_DIR)/kernext-rom.bin
 
 ROM_LABELS=$(BUILD_DIR)/rom_labels.h
 ROM_LST=$(BUILD_DIR)/rom_lst.h
@@ -474,6 +486,13 @@ $(BUILD_DIR)/basload-rom.bin: $(BASLOAD_DEPS)
 	cp basload/build/basload-rom.bin $(BUILD_DIR)/basload-rom.bin
 	./scripts/trace_info.py 15 basload/conf/basload-rom.cfg basload/build/basload-rom.lst $(BUILD_DIR)/basload-rom.rlst $(BUILD_DIR)/basload_labels.h
 
+# Bank 10: KERNEXT
+$(BUILD_DIR)/kernext-rom.bin: $(KERNEXT_OBJS) $(KERNEXT_DEPS) $(CFG_DIR)/kernext-x16.cfg
+	@mkdir -p $$(dirname $@)
+	$(LD) -C $(CFG_DIR)/kernext-x16.cfg $(KERNEXT_OBJS) -o $@ -m $(BUILD_DIR)/kernext.map -Ln $(BUILD_DIR)/kernext.sym \
+	`${BUILD_DIR}/../../findsymbols ${BUILD_DIR}/kernal.sym ps2data_kbd ps2data_kbd_count`
+	./scripts/relist.py $(BUILD_DIR)/kernext.map $(BUILD_DIR)/kernext
+
 $(BUILD_DIR)/rom_labels.h: $(BANK_BINS)
 	./scripts/symbolize.sh 0 build/x16/kernal.sym   > $@
 	./scripts/symbolize.sh 1 build/x16/keymap.sym  >> $@
@@ -488,6 +507,7 @@ $(BUILD_DIR)/rom_labels.h: $(BANK_BINS)
 	./scripts/symbolize.sh A build/x16/audio.sym   >> $@
 	./scripts/symbolize.sh B build/x16/util.sym    >> $@
 	./scripts/symbolize.sh C build/x16/bannex.sym  >> $@
+	./scripts/symbolize.sh 10 build/x16/kernext.sym >> $@
 	cat $@ $(BUILD_DIR)/x16edit_D_labels.h $(BUILD_DIR)/x16edit_E_labels.h $(BUILD_DIR)/basload_labels.h > $(BUILD_DIR)/rom_labels.tmp
 	mv $(BUILD_DIR)/rom_labels.tmp $@
 
@@ -506,3 +526,4 @@ $(BUILD_DIR)/rom_lst.h: $(BANK_BINS)
 	./scripts/trace_lst.py D $(BUILD_DIR)/x16edit-rom_D.rlst           >> $@
 	./scripts/trace_lst.py E $(BUILD_DIR)/x16edit-rom_E.rlst           >> $@
 	./scripts/trace_lst.py F $(BUILD_DIR)/basload-rom.rlst             >> $@
+	./scripts/trace_lst.py 10 `find build/x16/kernext/ -name \*.rlst`  >> $@

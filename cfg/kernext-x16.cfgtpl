@@ -1,0 +1,16 @@
+MEMORY {
+	#include "x16.cfginc"
+
+    KERNEXT:     start = $C000, size = $3A80, fill=yes, fillval=$AA;
+	KSUP_CODE16: start = $FA80, size = $0428, fill=yes, fillval=$AA;
+	KSUP_VEC16:  start = $FEA8, size = $0158, fill=yes, fillval=$AA;
+}
+
+SEGMENTS {
+    BUFFER:      load = KVEXTB0, type = bss, define = yes;
+    KVEXTB0:     load = KVEXTB0, type = bss;
+    JMPTBL:      load = KERNEXT, type = ro;
+    KERNEXT:     load = KERNEXT, type = ro;
+    KSUP_CODE16: load = KSUP_CODE16, type = ro;
+	KSUP_VEC16:  load = KSUP_VEC16,  type = ro;
+}

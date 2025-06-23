@@ -15,6 +15,7 @@
 .import __KRAM816B_LOAD__, __KRAM816B_RUN__, __KRAM816B_SIZE__
 .import __KVARSB0_LOAD__, __KVARSB0_RUN__, __KVARSB0_SIZE__
 .import __VARFONTS_LOAD__, __VARFONTS_RUN__, __VARFONTS_SIZE__
+.import __KVEXTB0_START__, __KVEXTB0_SIZE__
 .import __VECB0_LOAD__, __VECB0_RUN__, __VECB0_SIZE__
 .import memtop
 .import membot
@@ -97,6 +98,15 @@ ramtas:
 .assert __VARFONTS_SIZE__ < 256, error, "VARFONTS overflow!"
 	ldx #<__VARFONTS_SIZE__
 :	stz __VARFONTS_LOAD__,x
+	dex
+	bne :-
+
+;
+; clear bank 0 kernel extension variables
+;
+.assert __KVEXTB0_SIZE__ <= 256, error, "KVEXTB0 overflow!"
+	ldx #<__KVEXTB0_SIZE__
+:	stz __KVEXTB0_START__,x
 	dex
 	bne :-
 
