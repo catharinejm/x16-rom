@@ -11,9 +11,9 @@
 .segment "SERIALKBD"
 
 serialkbd_init:
-    KVARS_START
     php
     sei
+    KVARS_START
     stz serialkbd_RDPTR
     stz serialkbd_WTPTR
 
