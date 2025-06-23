@@ -6,14 +6,14 @@
 .include "kernext.inc"
 .include "via2.inc"
 
-.export serialkbd_init, serialkbd_fetch
+.export serialkbd_init
 
 .import ps2data_kbd, ps2data_kbd_count
 
 .segment "SERIALKBD"
 
 serialkbd_init:
-    KVARS_START_TRASH_A_NZ
+    KVARS_START
     php
     sei
     stz serialkbd_RDPTR
@@ -31,6 +31,6 @@ serialkbd_init:
     stz VIA2::pcr
 
 @done:
-    KVARS_END_TRASH_A_NZ
+    KVARS_END
     plp
     rts

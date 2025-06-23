@@ -183,7 +183,7 @@ serialkbd_read_byte:
     rts
 
 serialkbd_fetch:
-    KVARS_START_TRASH_X_NZ
+    KVARS_START
     jsr serialkbd_fill_buffer
 
     ;; let real PS/2 keyboard take precedence
@@ -201,5 +201,5 @@ serialkbd_fetch:
     inc ps2data_kbd_count
 
 @done:
-    KVARS_END_TRASH_X_NZ
+    KVARS_END
     rts

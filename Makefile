@@ -490,7 +490,7 @@ $(BUILD_DIR)/basload-rom.bin: $(BASLOAD_DEPS)
 $(BUILD_DIR)/kernext-rom.bin: $(KERNEXT_OBJS) $(KERNEXT_DEPS) $(CFG_DIR)/kernext-x16.cfg
 	@mkdir -p $$(dirname $@)
 	$(LD) -C $(CFG_DIR)/kernext-x16.cfg $(KERNEXT_OBJS) -o $@ -m $(BUILD_DIR)/kernext.map -Ln $(BUILD_DIR)/kernext.sym \
-	`${BUILD_DIR}/../../findsymbols ${BUILD_DIR}/kernal.sym ps2data_kbd ps2data_kbd_count`
+	`${BUILD_DIR}/../../findsymbols ${BUILD_DIR}/kernal.sym ps2data_kbd ps2data_kbd_count kvswitch_tmp1 kvswitch_tmp2`
 	./scripts/relist.py $(BUILD_DIR)/kernext.map $(BUILD_DIR)/kernext
 
 $(BUILD_DIR)/rom_labels.h: $(BANK_BINS)
