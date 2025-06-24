@@ -8,7 +8,6 @@ vars_start = *
 SIZE: .res 3
 BYTE: .res 1
 PTR:  .res 2
-BANK: .res 1
 SPACELEFT: .res 1
 vars_size = *-vars_start
 
@@ -25,13 +24,43 @@ vars_size = *-vars_start
 
 .segment "KERNEXT"
 
+;; .A = number of $7f bytes already read
 uart_read_file:
     php
     sei ;; disable interrupts
-    lda ram_bank
-    pha
-    lda #1
-    sta ram_bank
+    ldx ram_bank
+    phx
+    ldx #1
+    stx ram_bank
+
+    ;; Read and discard (16 - .A) remaining $7f bytes
+    clc
+    sbc #$10
+    eor #$ff
+    sta SIZE ;; just for debugging
+    ldx #0
+    ldy #$a0
+    jsr uart_read_bytes
+
+    ;; If in emulator and debug is on, verify we actually got #$7fs
+    ldy $9fbe
+    cpy #$31
+    bne @nodebug
+    ldy $9fbf
+    cpy #$36
+    bne @nodebug
+    ldy $9fb0
+    beq @nodebug
+    ldx SIZE
+    dex
+@chkloop:
+    lda $a000,x
+    cmp $7f
+    beq :+
+    stp ;; should launch debugger in emulator
+:   dex
+    bpl @chkloop
+@nodebug:
 
     ;; Read 3 bytes into SIZE
     lda #3
