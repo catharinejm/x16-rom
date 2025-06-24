@@ -5,10 +5,12 @@
 ; additions: (C)2020 Michael Steil, License: 2-clause BSD
 .include "io.inc"
 .include "banks.inc"
+.include "kernext.inc"
 
 .feature labels_without_colons
 
 .import cint, ramtas, ioinit, enter_basic, restor, vera_wait_ready, call_audio_init, boot_cartridge, i2c_restore, ps2data_init, detect_65c816
+.import kernext_call
 .include "65c816.inc"
 
 .export start
@@ -34,6 +36,9 @@ start	; Let diagnostic bank handle diagnostic boot if needed
 	jsr restor           ;go set up os vectors
 	jsr i2c_restore      ;release I2C pins and clear mutex flag
 	jsr ps2data_init
+    lda #<serialkbd_init
+    jsr kernext_call
+
 ;
 	jsr cint             ;go initilize screen
 	jsr call_audio_init  ;initialize audio API and HW.

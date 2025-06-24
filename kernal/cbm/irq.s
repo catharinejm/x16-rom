@@ -18,7 +18,7 @@
 .import led_update
 .import __interrupt_65c816_native_kernal_impl_ret
 .import ps2data_fetch
-.import jsrfar
+.import kernext_call
 .export panic
 .export irq_emulated_impl
 
@@ -31,9 +31,8 @@
 .macro irq_impl
 	jsr ps2data_fetch
 
-    ; jsr jsrfar
-    ; .word serialkbd_fetch
-    ; .byte BANK_KERNEXT
+    lda #<serialkbd_fetch
+    jsr kernext_call
 
 	jsr mouse_scan  ;scan mouse (do this first to avoid sprite tearing)
 	jsr joystick_scan

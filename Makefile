@@ -32,6 +32,7 @@ KERNAL_CORE_SOURCES = \
 	kernal/memory.s \
 	kernal/lzsa.s \
 	kernal/signature.s \
+	kernal/kernext.s \
 	kernal/cbm/editor.s \
 	kernal/cbm/channel/channel.s \
 	kernal/cbm/init.s \
@@ -67,7 +68,6 @@ KERNAL_DRIVER_SOURCES = \
 	kernal/drivers/x16/i2c.s \
 	kernal/drivers/x16/smc.s \
 	kernal/drivers/x16/rtc.s \
-	kernal/drivers/x16/serialkbd.s \
 	kernal/drivers/generic/softclock_timer.s
 
 KERNAL_SOURCES = \

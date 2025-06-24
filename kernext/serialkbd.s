@@ -8,15 +8,40 @@
 
 .import ps2data_kbd, ps2data_kbd_count
 
-.export serialkbd_fetch, serialkbd_fill_buffer, serialkbd_read_byte
-    
+.export serialkbd_init, serialkbd_fetch, serialkbd_fill_buffer, serialkbd_read_byte
+
 .segment "BUFFER"
 .assert * = __KVEXTB0_START__, error, "BUFFER must be at the start of KVEXTB0"
 BUFFER: .res 16
+
+.segment "KEXTVAR"
 RDPTR: .res 1
 WTPTR: .res 1
 
 .segment "KERNEXT"
+
+serialkbd_init:
+    php
+    sei
+    KVARS_START
+    stz RDPTR
+    stz WTPTR
+
+    lda #$7f
+    sta VIA2::ier
+    sta VIA2::ifr
+
+    lda #SERIALKBD::RTSPIN
+    sta VIA2::ddrb ;; Set RTS as output
+    sta VIA2::regb ;; set RTS high
+
+    stz VIA2::acr
+    stz VIA2::pcr
+
+@done:
+    KVARS_END
+    plp
+    rts
 
 ;; Waits (Y-1)*5 cycles + 10
 _spin_wait:

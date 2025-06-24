@@ -14,6 +14,7 @@
 .import __KRAM02B_LOAD__, __KRAM02B_RUN__, __KRAM02B_SIZE__
 .import __KRAM816B_LOAD__, __KRAM816B_RUN__, __KRAM816B_SIZE__
 .import __KVARSB0_LOAD__, __KVARSB0_RUN__, __KVARSB0_SIZE__
+.import __KEXTCALL_LOAD__, __KEXTCALL_RUN__, __KEXTCALL_SIZE__
 .import __VARFONTS_LOAD__, __VARFONTS_RUN__, __VARFONTS_SIZE__
 .import __KVEXTB0_START__, __KVEXTB0_SIZE__
 .import __VECB0_LOAD__, __VECB0_RUN__, __VECB0_SIZE__
@@ -116,6 +117,12 @@ ramtas:
 	ldx #<__KRAMJFAR_SIZE__
 :	lda __KRAMJFAR_LOAD__-1,x
 	sta __KRAMJFAR_RUN__-1,x
+	dex
+	bne :-
+
+    ldx #<__KEXTCALL_SIZE__
+:	lda __KEXTCALL_LOAD__-1,x
+	sta __KEXTCALL_RUN__-1,x
 	dex
 	bne :-
 

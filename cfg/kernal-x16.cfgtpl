@@ -33,7 +33,7 @@ SEGMENTS {
 	PS2:      load = KERNAL,   type = ro;
 	PS2KBD:   load = KERNAL,   type = ro;
 	PS2MOUSE: load = KERNAL,   type = ro;
-    SERIALKBD:load = KERNAL, type = ro;
+    KERNEXT:load = KERNAL, type = ro;
 	SERIAL:   load = KERNAL,   type = ro;
 	LZSA:     load = KERNAL,   type = ro;
 	CHANNEL:  load = KERNAL,   type = ro;
@@ -75,6 +75,7 @@ SEGMENTS {
 	KRAM02B:  load = KERNAL,   run = KRAM02B,  type = ro, define = yes;
 	KRAM816B: load = KERNAL,   run = KRAM816B, type = ro, define = yes;
 	VECB0:    load = KERNAL,   run = VECB0, type = ro, define = yes;
+    KEXTCALL: load = KERNAL,   run = KEXTCALL, type = ro, define = yes;
 	JMPTBL:   load = JMPTBL,   type = ro;
 	VECTORS:  load = VECTORS,  type = ro;
 }

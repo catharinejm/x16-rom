@@ -23,7 +23,6 @@
 .import jsrfar
 .import fetvec
 .import fetch
-.import serialkbd_init
 .importzp tmp2
 
 .segment "MACHINE"
@@ -41,7 +40,6 @@ ioinit:
 	jsr entropy_init
 	jsr clklo       ;release the clock line
 
-    jsr serialkbd_init
 	; fallthrough
 
 ;---------------------------------------------------------------
