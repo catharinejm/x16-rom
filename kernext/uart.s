@@ -3,7 +3,7 @@
 .include "regs.inc"
 .include "via2.inc"
 
-.segment "ZPKEXT"
+.segment "ZPKEXT": zeropage
 vars_start = *
 SIZE: .res 3
 BYTE: .res 1
@@ -14,17 +14,17 @@ vars_size = *-vars_start
 
 ;; Waits
 .macro spin_wait_clobber_x cycles
-.assert (cycles - 6) >= 0 && (cycles - 6) % 5 == 0, error, "spin_wait_clobber_x cycles must be 5n + 6"
-.local iters
-iters = cycles / 5
-    ldx #iters ;; 2c
-.local @loop
+.assert (cycles - 6) >= 0 && (cycles - 6) .mod 5 = 0, error, "spin_wait_clobber_x cycles must be 5n + 6"
+.local @iters,@loop
+@iters = (cycles - 6) / 5
+    ldx #@iters ;; 2c
 @loop:
     dex       ;; 2c
     bpl @loop ;; 3c (taken) 2c (not taken)
 .endmacro
 
 .segment "KERNEXT"
+
 uart_read_file:
     php
     sei ;; disable interrupts
@@ -157,7 +157,7 @@ uart_read_bytes:
 
     ;; 30 cyc into stop bit spin
     ;; Spin 36 more
-    spin_wait 36 ;; 36 cycles
+    spin_wait_clobber_x 36 ;; 36 cycles
 
     lda #SERIALKBD::RXPIN
 :   bit VIA2::regb

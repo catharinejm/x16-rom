@@ -7,7 +7,7 @@ MEMORY {
 }
 
 SEGMENTS {
-    ZPKEXT:      load = ZPKEXT, type = bss;
+    ZPKEXT:      load = ZPKEXT, type = zp;
     BUFFER:      load = KVEXTB0, type = bss, define = yes;
     KVEXTB0:     load = KVEXTB0, type = bss;
     KEXTVAR:     load = KEXTVAR, type = bss;

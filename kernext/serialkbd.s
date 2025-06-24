@@ -1,6 +1,6 @@
 ;; -*- no-whitespace-cleanup: () -*-
-; .include "io.inc"
-; .include "banks.inc"
+.include "io.inc"
+.include "banks.inc"
 .include "regs.inc"
 .include "via2.inc"
 
@@ -53,12 +53,12 @@ _spin_wait:
     rts           ;; 6c
 .popseg
 
-;; Waits iters*5 cycles + 20
+;; Waits [cycles] cycles
 .macro spin_wait cycles
-.assert cycles >= 20 && cycles % 5 == 0, error, "spin_wait cycles must be multiple of five >= 20"
-.local iters
-iters = (cycles - 20) / 5 + 1
-    ldy #iters     ;; 2c
+.assert cycles >= 20 && cycles .mod 5 = 0, error, "spin_wait cycles must be multiple of five >= 20"
+.local @iters
+@iters = (cycles - 20) / 5 + 1
+    ldy #@iters    ;; 2c
     jsr _spin_wait ;; iters*5+16
     nop            ;; 2c
 .endmacro
