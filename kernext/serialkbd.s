@@ -1,4 +1,6 @@
 ;; -*- no-whitespace-cleanup: () -*-
+.setcpu "65C02"
+
 .include "io.inc"
 .include "banks.inc"
 .include "regs.inc"
@@ -7,6 +9,7 @@
 .import __KVEXTB0_START__
 
 .import ps2data_kbd, ps2data_kbd_count
+.import uart_read_file
 
 .export serialkbd_init, serialkbd_fetch, serialkbd_fill_buffer, serialkbd_read_byte
 
@@ -200,6 +203,20 @@ serialkbd_read_byte:
     lda #0
     bra @done
 :   lda BUFFER,X
+    cmp #$7f
+    bne @regular_key
+    ; stp
+    ;; if we got $7f, then assume the rest of the buffer is also $7f, end dispatch to uart_read_file
+    lda WTPTR
+    sec
+    sbc RDPTR
+    and #$0f
+    jsr uart_read_file
+    lda WTPTR
+    sta RDPTR ;; Set the buffer empty
+    lda #0    ;; ... and return no code
+    bra @done
+@regular_key:
     tax
     lda RDPTR
     ina

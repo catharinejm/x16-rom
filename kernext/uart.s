@@ -1,7 +1,11 @@
 ;; -*- no-whitespace-cleanup: () -*-
+.setcpu "65C02"
+
 .include "io.inc"
 .include "regs.inc"
 .include "via2.inc"
+
+.export uart_read_file
 
 .segment "ZPKEXT": zeropage
 vars_start = *
@@ -55,7 +59,7 @@ uart_read_file:
     dex
 @chkloop:
     lda $a000,x
-    cmp $7f
+    cmp #$7f
     beq :+
     stp ;; should launch debugger in emulator
 :   dex
@@ -67,10 +71,11 @@ uart_read_file:
     ldx #<SIZE
     ldy #>SIZE
     jsr uart_read_bytes
+    stp
 
 @read_bank:
     ldy #$a0
-    sta PTR+1
+    sty PTR+1
 @read_loop:
     lda SIZE+1
     bne @read_next_page
