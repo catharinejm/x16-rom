@@ -7,10 +7,12 @@ MEMORY {
 }
 
 SEGMENTS {
+    ZPKEXT:      load = ZPKEXT, type = bss;
     BUFFER:      load = KVEXTB0, type = bss, define = yes;
     KVEXTB0:     load = KVEXTB0, type = bss;
     KEXTVAR:     load = KEXTVAR, type = bss;
     JMPTBL:      load = KERNEXT, type = ro;
+    SPINWAIT:    load = KERNEXT, type = ro;
     KERNEXT:     load = KERNEXT, type = ro;
     KSUP_CODE16: load = KSUP_CODE16, type = ro;
 	KSUP_VEC16:  load = KSUP_VEC16,  type = ro;

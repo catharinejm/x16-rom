@@ -1,6 +1,6 @@
 ;; -*- no-whitespace-cleanup: () -*-
-.include "io.inc"
-.include "banks.inc"
+; .include "io.inc"
+; .include "banks.inc"
 .include "regs.inc"
 .include "via2.inc"
 
@@ -43,18 +43,24 @@ serialkbd_init:
     plp
     rts
 
+.pushseg
+.segment "SPINWAIT"
 ;; Waits (Y-1)*5 cycles + 10
 _spin_wait:
     dey           ;; 2c
     bne _spin_wait ;; 3c (taken) 2c (not taken)
 .assert >* = >_spin_wait, error, "spin_wait across page"
     rts           ;; 6c
+.popseg
 
 ;; Waits iters*5 cycles + 20
-.macro spin_wait iters
-    ldy #iters + 1  ;; 2c
-    jsr _spin_wait  ;; iters*5+16
-    nop             ;; 2c
+.macro spin_wait cycles
+.assert cycles >= 20 && cycles % 5 == 0, error, "spin_wait cycles must be multiple of five >= 20"
+.local iters
+iters = (cycles - 20) / 5 + 1
+    ldy #iters     ;; 2c
+    jsr _spin_wait ;; iters*5+16
+    nop            ;; 2c
 .endmacro
 
 SPACELEFT := r0
@@ -143,13 +149,13 @@ serialkbd_fill_buffer:
 
     ;; Bit 0 is 22/23 cycles into the next wait
     ;; but only spin 43cyc more (65 total, not 70) b/c there's a ~10 cycle drift as we read
-    spin_wait 4 ;; 40c
+    spin_wait 40 ;; 40c
     lda #SERIALKBD::RXPIN  ;; 2c
     read_bit    ;; 15c
 
 ;; Bits 1-7 are 15cyc into the next wait
 .repeat 7
-    spin_wait 7 ;; 55cyc
+    spin_wait 55 ;; 55cyc
     ;; 70 cyc
     read_bit    ;; 15cyc
 ;; 15 cyc into next spin
@@ -165,7 +171,7 @@ serialkbd_fill_buffer:
 
     ;; 28 cyc into stop bit spin
     ;; Spin 36 more (64 total) b/c we've drifted from -5 to +5 by now
-    spin_wait 4 ;; 40 cycles
+    spin_wait 40 ;; 40 cycles
 
     lda #SERIALKBD::RXPIN
 :   bit VIA2::regb
