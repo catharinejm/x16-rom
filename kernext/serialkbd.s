@@ -205,7 +205,6 @@ serialkbd_read_byte:
 :   lda BUFFER,X
     cmp #$7f
     bne @regular_key
-    ; stp
     ;; if we got $7f, then assume the rest of the buffer is also $7f, end dispatch to uart_read_file
     lda WTPTR
     sec

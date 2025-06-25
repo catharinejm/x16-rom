@@ -5,15 +5,21 @@
 .include "regs.inc"
 .include "via2.inc"
 
-.export uart_read_file
+.export uart_read_file, uart_prep_for_read, uart_is_file_ready
 
 .segment "ZPKEXT": zeropage
 vars_start = *
-SIZE: .res 3
-BYTE: .res 1
 PTR:  .res 2
+LASTBANK: .res 1
+SIZE: .res 3
+;; TODO: Could BYTE and SPACELEFT go on the stack? Unsure of tradeoff
+;; between stack overflow vs using up zp
+BYTE: .res 1
 SPACELEFT: .res 1
 vars_size = *-vars_start
+
+.segment "KVEXTB0"
+FILE_ID: .res 1
 
 ;; Waits
 .macro spin_wait_clobber_x cycles
@@ -71,7 +77,6 @@ uart_read_file:
     ldx #<SIZE
     ldy #>SIZE
     jsr uart_read_bytes
-    stp
 
 @read_bank:
     ldy #$a0
@@ -98,17 +103,28 @@ uart_read_file:
 
 @read_tail:
     lda SIZE
+    beq @return
     ldx #0
     ldy PTR+1
     jsr uart_read_bytes
+    sty PTR
 
 @return:
+    lda PTR+1
+    cmp #$a0
+    bne @1
+    lda PTR
+    bne @1
+    lda #$c0
+    sta PTR+1
+    dec ram_bank
+@1:
     lda ram_bank
-    dec ;; TODO handle < 256 banks?
+    sta LASTBANK
+    stz ram_bank
+    inc FILE_ID
     plx
     stx ram_bank
-    ldx PTR
-    ldy PTR+1
     plp
     rts
 
@@ -177,7 +193,7 @@ uart_read_bytes:
 ;; Bits 1-7 are 14cyc into the next wait
 .repeat 7
     spin_wait_clobber_x 56 ;; 56cyc
-    ;; 69 cyc
+    ;; 70 cyc
     read_bit     ;; 14cyc
 ;; 14 cyc into next spin
 .endrepeat
@@ -200,4 +216,43 @@ uart_read_bytes:
     jmp @wait_for_start
 
 @return:
+    rts
+
+;; Returns .A = next FILE_ID
+uart_prep_for_read:
+    php
+    phx
+    sei
+    ldx ram_bank
+    stz ram_bank
+    lda FILE_ID
+    ina
+    stx ram_bank
+    plx
+    plp
+    rts
+
+;; .A = expected file id
+;; Returns: if file is ready: .A=LASTBANK, .X=PTR, .Y=PTR+1, .C=0
+;;          otherwise: .C=1
+uart_is_file_ready:
+    phx
+    ldx ram_bank
+    phx
+    stz ram_bank
+    cmp FILE_ID
+    beq :+
+    plx
+    stx ram_bank
+    plx
+    sec
+    rts
+
+:   plx
+    stx ram_bank
+    plx
+    lda LASTBANK
+    ldx PTR
+    ldy PTR+1
+    clc
     rts
