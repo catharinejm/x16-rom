@@ -258,7 +258,6 @@ jsrfar:
 .export jmpfr
 .assert * = jsrfar3, error, "jsrfar3 must be at specific address"
 ;jsrfar3:
-_jsrfar3:
 	sta rom_bank    ;set ROM bank
 	pla
     rti
@@ -288,7 +287,6 @@ _jsrfar3:
 .assert * = jsrfar3n, error, "jsrfar3n must be at specific address"
 
 ;jsrfar3n:
-_jsrfar3n:
 	.A8
 	.I16
 	sta rom_bank    ;set ROM bank

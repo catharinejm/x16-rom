@@ -65,32 +65,31 @@
 ; .word address
 ; .byte bank
 
-; .import jsrfar3_return, jsrfar3n_return
-
 	php             ;original bank
 	php             ;ret hi
-    php             ;ret lo
+	php             ;ret lo
 
-                    ;[emu]  / [native]
-    php             ;jmp hi / bank
-    php             ;jmp lo / jmp hi
-    php             ;status / jmp lo
-    php             ;.A     / status
+					;[emu]  / [native]
+	php             ;jmp hi / bank
+	php             ;jmp lo / jmp hi
+	php             ;status / jmp lo
+	php             ;.A     / status
 
-    sei
+	sei
 	sec
 	.byte $c2, $03 ; rep #$03, clear carry/z if 65c816
 	bcc jsrfarn
-    clc
+
+	clc
 jsrfare:
 	phx
 	phy
 
 	tsx
-    sta $103,x ;; store A in extra byte
+	sta $103,x ;; store A in extra byte
 	lda $10a,x      ;return address lo
 	sta imparm
-    ; carry is clear
+	; carry is clear
 	adc #3
 	sta $10a,x      ;and write back with 3 added
 	lda $10b,x      ;return address hi
@@ -107,10 +106,10 @@ jsrfare:
 	cmp #$c0
 	bcc jsrfar1     ;target is in RAM
 ; target is in ROM
-    lda #<jsrfar3_return
-    sta $107,x
-    lda #>jsrfar3_return
-    sta $108,x
+	lda #<jsrfar3_return
+	sta $107,x
+	lda #>jsrfar3_return
+	sta $108,x
 	lda rom_bank
 	sta $0109,x     ;save original bank into reserved byte
 	iny
@@ -123,17 +122,17 @@ jsrfare:
 jsrfar1:
 	lda ram_bank
 	sta $0109,x     ;save original bank into reserved byte
-    lda #<@return
-    sta $107,x
-    lda #>@return
-    sta $108,x
+	lda #<@return
+	sta $107,x
+	lda #>@return
+	sta $108,x
 	iny
 	lda (imparm),y  ;target address bank
 	sta ram_bank    ;set RAM bank
 	ply             ;restore registers
 	plx
 	pla
-    rti
+	rti
 @return = * - 1
 	php
 	pha
@@ -157,22 +156,22 @@ jsrfar2:
 jsrfarn:
 	; carry is clear
 	php
-    ; interrupts already disabled
+	; interrupts already disabled
 	xce
 	bcc :+
 	xce
 	plp
 	bra jsrfare ; with carry cleared
-:   plp
+:	plp
 	rep #$31    ; force 16 bit memory/index, clear carry
 	.A16
 	.I16
 	pha
 	phy
-    phk
-    phk ; need an extra byte on the stack to pull into .A
-    pla
-    sta $8,S ; will clobber byte above too (ret lo), but it hasn't been set yet anyway
+	phk
+	phk ; need an extra byte on the stack to pull into .A
+	pla
+	sta $8,S ; will clobber byte above too (ret lo), but it hasn't been set yet anyway
 	lda $c,S   ; fetch return address
 	sta imparm
 	; carry is clear
@@ -184,8 +183,8 @@ jsrfarn:
 	cmp #$c000
 	bcc jsrfar1n
 ; target is in ROM
-    lda #jsrfar3n_return
-    sta $9,S
+	lda #jsrfar3n_return
+	sta $9,S
 	sep #$20    ; 8 bit accumulator
 	.A8
 	lda rom_bank
@@ -206,11 +205,11 @@ jsrfar1n:
 	sta ram_bank
 	rep #$20   ; 16 bit accumulator
 	.A16
-    lda #@return
-    sta $9,S
+	lda #@return
+	sta $9,S
 	ply
 	pla
-    rti
+	rti
 @return = * - 1
 	php        ; preserve flags immediately after return from call
 	sep #$20   ; 8 bit accumulator
