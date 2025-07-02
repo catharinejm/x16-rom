@@ -72,11 +72,11 @@
     php             ;ret lo
     php             ; saved status
 
+    sei
 	sec
 	.byte $c2, $03 ; rep #$03, clear carry/z if 65c816
 	bcc jsrfarn
 
-    sei
 jsrfare:
     plp
     php ; jmp hi
