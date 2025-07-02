@@ -70,7 +70,12 @@
 	php             ;original bank
 	php             ;ret hi
     php             ;ret lo
-    php             ; saved status
+
+                    ;[emu]  / [native]
+    php             ;jmp hi / bank
+    php             ;jmp lo / jmp hi
+    php             ;status / jmp lo
+    php             ;.A     / status
 
     sei
 	sec
@@ -78,15 +83,11 @@
 	bcc jsrfarn
 
 jsrfare:
-    plp
-    php ; jmp hi
-    php ; jmp lo
-    php ; status
-	pha
 	phx
 	phy
 
 	tsx
+    sta $103,x ;; store A in extra byte
 	lda $10a,x      ;return address lo
 	sta imparm
     clc
@@ -156,23 +157,22 @@ jsrfar2:
 jsrfarn:
 	; carry is clear
 	php
+    ; interrupts already disabled
 	xce
 	bcc :+
 	xce
 	plp
 	bra jsrfare ; with carry cleared
 :   plp
-    plp ; restore original status
-    phk ; actual bank
-    php ; target hi
-    php ; target lo
-    php ; status
 	rep #$31    ; force 16 bit memory/index, clear carry
 	.A16
 	.I16
 	pha
 	phy
-
+    phk
+    phk ; need an extra byte on the stack to pull into .A
+    pla
+    sta $8,S ; will clobber byte above too (ret lo), but it hasn't been set yet anyway
 	lda $c,S   ; fetch return address
 	sta imparm
 	clc
