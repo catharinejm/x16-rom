@@ -189,7 +189,7 @@ jsrfarn:
 	sep #$20    ; 8 bit accumulator
 	.A8
 	lda rom_bank
-	sta $11,S   ; save original bank onto reserved byte
+	sta $b,S   ; save original bank onto reserved byte
 	ldy #3
 	lda (imparm),y
 	ply
