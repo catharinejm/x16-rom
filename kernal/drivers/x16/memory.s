@@ -258,10 +258,12 @@ jsrfar:
 .export jmpfr
 .assert * = jsrfar3, error, "jsrfar3 must be at specific address"
 ;jsrfar3:
+_jsrfar3:
 	sta rom_bank    ;set ROM bank
 	pla
-	plp
-	jsr jmpfr
+    rti
+;jsrfar3_return = $02c7
+.assert * - 1 = jsrfar3_return, error, "jsrfar3_return must be at specific address"
 	php
 	pha
 	phx
@@ -275,9 +277,9 @@ jsrfar:
 	plp
 	plp
 	rts
-.assert * = jmpfr, error, "jmpfr must be at specific address"
-__jmpfr:
-	jmp $ffff
+; .assert * = jmpfr, error, "jmpfr must be at specific address"
+; __jmpfr:
+; 	jmp $ffff
 
 .pushcpu
 .setcpu "65816"
@@ -286,14 +288,16 @@ __jmpfr:
 .assert * = jsrfar3n, error, "jsrfar3n must be at specific address"
 
 ;jsrfar3n:
+_jsrfar3n:
 	.A8
 	.I16
 	sta rom_bank    ;set ROM bank
 	rep #$20
 	.A16
 	pla
-	plp             ; restore all flags immediately before call
-	jsr jmpfr
+    rti
+;; jsrfar3n_return = * - 1
+.assert * - 1 = jsrfar3n_return, error, "jsrfar3n_return must be at specific address"
 	php
 	sep #$20        ; 8 bit accumulator
 	.A8
