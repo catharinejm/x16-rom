@@ -81,7 +81,7 @@
 	sec
 	.byte $c2, $03 ; rep #$03, clear carry/z if 65c816
 	bcc jsrfarn
-
+    clc
 jsrfare:
 	phx
 	phy
@@ -90,7 +90,7 @@ jsrfare:
     sta $103,x ;; store A in extra byte
 	lda $10a,x      ;return address lo
 	sta imparm
-    clc
+    ; carry is clear
 	adc #3
 	sta $10a,x      ;and write back with 3 added
 	lda $10b,x      ;return address hi
@@ -175,7 +175,7 @@ jsrfarn:
     sta $8,S ; will clobber byte above too (ret lo), but it hasn't been set yet anyway
 	lda $c,S   ; fetch return address
 	sta imparm
-	clc
+	; carry is clear
 	adc #3
 	sta $c,S   ; write back return address+3
 	ldy #1
