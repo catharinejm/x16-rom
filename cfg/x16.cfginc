@@ -25,7 +25,7 @@ KVAR:     start = $0200, size = $0095; # KERNAL
 KRAM816S: start = $0295, size = $0003; # KERNAL: 65C816: old stack pointer
 KJFAR816: start = $0298, size = $0019; # KERNAL: jsrfar3n
 KEXTCALL: start = $02B1, size = $0009; # KERNEXT: kernext_call helper
-KEXTVAR:  start = $02BA, size = $0007; # KERNEXT
+KEXTVAR:  start = $02BA, size = $0006; # KERNEXT
 I2CMUTEX: start = $02C0, size = $0001; # I2C MUTEX FLAG
 GRAPHVAR: start = $02C1, size = $0003; # GRAPH BANK VARS
 KRAMJFAR: start = $02C4, size = $001E; # KERNAL: jsrfar3
