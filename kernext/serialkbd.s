@@ -1,4 +1,4 @@
-;; -*- no-whitespace-cleanup: () -*-
+;; -*- no-whitespace-cleanup: (); indent-tabs-mode: () -*-
 .setcpu "65C02"
 
 .include "io.inc"
