@@ -30,6 +30,7 @@ FILE_ID: .res 1
 @loop:
     dex       ;; 2c
     bpl @loop ;; 3c (taken) 2c (not taken)
+.assert >* = >@loop, error, "spin_wait_clobber_x across page boundary"
 .endmacro
 
 .segment "KERNEXT"
@@ -143,7 +144,6 @@ uart_read_bytes:
     tsb VIA2::regb ;; and back high
 
     lda #SERIALKBD::RXPIN
-    ; ldy #25 ;; 25 iterations of 11cyc = 275 = 34.375us ~= 4 baud widths at 115200 baud (34.722us)
 @wait_for_start:
     bit VIA2::regb      ;; 4cyc
     bne @wait_for_start ;; 3cyc (taken)
@@ -153,17 +153,13 @@ uart_read_bytes:
 
     nop
     nop
-    nop
-    nop
-    nop
-    nop
 
-    ;; Now we're 12-23 cycles into the start bit
+    ;; Now we're 4-14 cycles into the start bit
 
     bit VIA2::regb      ;; 4c
     bne @wait_for_start ;; 2c (not taken)
 
-    ;; 18-29 cycles in
+    ;; 10-20 cycles in
 
     ;; Pulse RTS again if we can take another bit after this
     ;; Doing it early so there's no pause between bytes from the FTDI
@@ -185,19 +181,18 @@ uart_read_bytes:
 .endmacro
 
     ;; Bit 0 is 22/23 cycles into the next wait
-    ;; but only spin 43cyc more (65 total, not 70) b/c there's a ~10 cycle drift as we read
-    spin_wait_clobber_x 41 ;; 41c
     lda #SERIALKBD::RXPIN  ;; 2c
     read_bit               ;; 14c
 
+    ;; We're maybe 4 cycles behind here
+
 ;; Bits 1-7 are 14cyc into the next wait
 .repeat 7
-    spin_wait_clobber_x 56 ;; 56cyc
-    ;; 70 cyc
+    spin_wait_clobber_x 21 ;; 21cyc
+    ;; 35 cyc
     read_bit     ;; 14cyc
 ;; 14 cyc into next spin
 .endrepeat
-;; 8 cycle drift?
 
     lda BYTE       ;; 3c
     sta (PTR),Y    ;; 6c
@@ -205,14 +200,9 @@ uart_read_bytes:
     lda SPACELEFT  ;; 3c (already decremented)
     beq @return    ;; 2c (not taken)
 
-    ;; 30 cyc into stop bit spin
-    ;; Spin 36 more
-    spin_wait_clobber_x 36 ;; 36 cycles
-
     lda #SERIALKBD::RXPIN
 :   bit VIA2::regb
     beq :-   ;; wait till high stop bit comes in just in case
-    ; ldy #8   ;; only wait upto 88 cycles for start bit, it will come immediately if there's more data
     jmp @wait_for_start
 
 @return:

@@ -103,7 +103,7 @@ serialkbd_fill_buffer:
     tsb VIA2::regb ;; and back high
 
     lda #SERIALKBD::RXPIN
-    ldy #25 ;; 25 iterations of 11cyc = 275 = 34.375us ~= 4 baud widths at 115200 baud (34.722us)
+    ldy #13 ;; 13 iterations of 11cyc = 143 = 17.875us ~= 4 baud widths at 230400 baud (17.361us)
 @wait_for_start:
     bit VIA2::regb      ;; 4cyc
     beq @start_read     ;; 2cyc (not taken)
@@ -118,17 +118,13 @@ serialkbd_fill_buffer:
 
     nop
     nop
-    nop
-    nop
-    nop
-    nop
 
-    ;; Now we're 12-23 cycles into the start bit
+    ;; Now we're 4-15 cycles into the start bit
 
     bit VIA2::regb      ;; 4c
     bne @wait_for_start ;; 2c (not taken)
 
-    ;; 18-29 cycles in
+    ;; 10-21 cycles in
 
     ;; Pulse RTS again if we can take another bit after this
     ;; Doing it early so there's no pause between bytes from the FTDI
@@ -151,19 +147,23 @@ serialkbd_fill_buffer:
 .endmacro
 
     ;; Bit 0 is 22/23 cycles into the next wait
-    ;; but only spin 43cyc more (65 total, not 70) b/c there's a ~10 cycle drift as we read
-    spin_wait 40 ;; 40c
     lda #SERIALKBD::RXPIN  ;; 2c
     read_bit    ;; 15c
 
+    ;; We're maybe 5cycles behind here
+
+.repeat 8
+    nop
+.endrepeat
+    read_bit
+
 ;; Bits 1-7 are 15cyc into the next wait
-.repeat 7
-    spin_wait 55 ;; 55cyc
-    ;; 70 cyc
+.repeat 6
+    spin_wait 20 ;; 20 cyc
+    ;; 35 cyc
     read_bit    ;; 15cyc
 ;; 15 cyc into next spin
 .endrepeat
-;; 8 cycle drift
 
     inx            ;; 2c
     txa            ;; 2c
@@ -173,13 +173,11 @@ serialkbd_fill_buffer:
     beq @return    ;; 2c (not taken)
 
     ;; 28 cyc into stop bit spin
-    ;; Spin 36 more (64 total) b/c we've drifted from -5 to +5 by now
-    spin_wait 40 ;; 40 cycles
 
     lda #SERIALKBD::RXPIN
 :   bit VIA2::regb
     beq :-   ;; wait till high stop bit comes in just in case
-    ldy #8   ;; only wait upto 88 cycles for start bit, it will come immediately if there's more data
+    ldy #4   ;; only wait upto 44 cycles for start bit, it will come immediately if there's more data
     jmp @wait_for_start
 
 @return:
