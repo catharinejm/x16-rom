@@ -153,6 +153,7 @@ uart_read_bytes:
 
     nop
     nop
+    nop
 
     ;; Now we're 4-14 cycles into the start bit
 

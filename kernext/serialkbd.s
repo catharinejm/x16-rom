@@ -118,6 +118,7 @@ serialkbd_fill_buffer:
 
     nop
     nop
+    nop
 
     ;; Now we're 4-15 cycles into the start bit
 
