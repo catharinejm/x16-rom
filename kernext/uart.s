@@ -138,17 +138,23 @@ uart_read_bytes:
     ;; Y contains offset into PTR
     ldy #0
 
+@pulse_rts:
     lda #SERIALKBD::RTSPIN
     trb VIA2::regb ;; pulse RTS low...
     tsb VIA2::regb ;; and back high
 
     lda #SERIALKBD::RXPIN
-    ; ldy #25 ;; 25 iterations of 11cyc = 275 = 34.375us ~= 4 baud widths at 115200 baud (34.722us)
+    ldx #25 ;; 25 iterations of 11cyc = 275 = 34.375us ~= 4 baud widths at 115200 baud (34.722us)
 @wait_for_start:
     bit VIA2::regb      ;; 4cyc
+    beq @start_read     ;; 2cyc (not taken)
+    dex                 ;; 2cyc
     bne @wait_for_start ;; 3cyc (taken)
+    bra @pulse_rts ;; 4 baud cycles without a start bit, frontend might have
+                   ;; gotten delayed sending data and missed the CTS strobe. do it again
 .assert >* = >@wait_for_start, error, "jumping across page"
 
+@start_read:
     ;; ~10 cycles may have passed between RX going low and arriving here
 
     nop
@@ -212,7 +218,7 @@ uart_read_bytes:
     lda #SERIALKBD::RXPIN
 :   bit VIA2::regb
     beq :-   ;; wait till high stop bit comes in just in case
-    ; ldy #8   ;; only wait upto 88 cycles for start bit, it will come immediately if there's more data
+    ldx #8   ;; only wait upto 88 cycles for start bit, it will come immediately if there's more data
     jmp @wait_for_start
 
 @return:
