@@ -1,4 +1,4 @@
-.setcpu "65C02"
+.setcpu "W65C02"
 
 .import serialkbd_init, serialkbd_fetch_in_kvars, serialkbd_fetch, serialkbd_fill_buffer, serialkbd_read_byte
 .import uart_prep_for_read, uart_is_file_ready

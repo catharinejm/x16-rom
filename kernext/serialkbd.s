@@ -1,5 +1,5 @@
 ;; -*- no-whitespace-cleanup: (); indent-tabs-mode: () -*-
-.setcpu "65C02"
+.setcpu "W65C02"
 
 .include "io.inc"
 .include "banks.inc"
