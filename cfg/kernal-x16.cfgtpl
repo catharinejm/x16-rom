@@ -51,6 +51,7 @@ SEGMENTS {
 	C816_COP_NATIVE: load = KERNAL, type = ro, start = $EF4C; # low byte: JMP abs, high byte equals low byte of C816_GETIN_THUNK
 	C816_COP_EMULATED: load = KERNAL, type = ro;
 	C816_ABORT_EMULATED: load = KERNAL, type = ro;
+	UTIL:     load = KERNAL,   type = ro;
 	KBDBUF:   load = KERNAL,   type = ro;
 	CLOCK:    load = KERNAL,   type = ro;
 	I2C:      load = KERNAL,   type = ro;
@@ -62,12 +63,10 @@ SEGMENTS {
 	MEMDRV:   load = KERNAL,   type = ro;
 	NMI:      load = KERNAL,   type = ro;
 	IRQ:      load = KERNAL,   type = ro;
-	UTIL:     load = KERNAL,   type = ro;
 	GRAPH:    load = KERNAL,   type = ro;
 	CONSOLE:  load = KERNAL,   type = ro;
 	SPRITES:  load = KERNAL,   type = ro;
 	VERA_DRV: load = KERNAL,   type = ro;
-	PALETTE:  load = KERNAL,   type = ro, align = $100;
 	KRAMJFAR: load = KERNAL,   run = KRAMJFAR, type = ro, define = yes;
 	KJFAR816: load = KERNAL,   run = KJFAR816, type = ro, define = yes;
 	KERNRAM2: load = KERNAL,   run = KERNRAM2, type = ro, define = yes;
