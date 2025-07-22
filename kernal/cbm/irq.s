@@ -18,22 +18,16 @@
 .import led_update
 .import __interrupt_65c816_native_kernal_impl_ret
 .import ps2data_fetch
-.import kernext_call
 .export panic
 .export irq_emulated_impl
 
 .include "banks.inc"
 .include "io.inc"
-.include "kernext.inc"
 
 ; VBLANK IRQ handler
 ;
 .macro irq_impl
 	jsr ps2data_fetch
-
-    lda #<serialkbd_fetch
-    jsr kernext_call
-
 	jsr mouse_scan  ;scan mouse (do this first to avoid sprite tearing)
 	jsr joystick_scan
 	jsr clock_update

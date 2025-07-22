@@ -1,6 +1,7 @@
 .include "banks.inc"
 .include "regs.inc"
 .include "io.inc"
+.include "kernext.inc"
 
 .segment "PS2KBD"
 
@@ -21,6 +22,7 @@ LED_NUM_LOCK	= 2
 
 .import i2c_read_byte, i2c_read_first_byte, i2c_direct_read, i2c_read_next_byte, i2c_read_stop, i2c_write_byte
 .import tpmflg, tpmcache, ledstate
+.import kernext_call
 
 .export ps2data_init, ps2data_fetch, ps2data_kbd, ps2data_kbd_count, ps2data_mouse, ps2data_mouse_count
 .export ps2data_keyboard_and_mouse, ps2data_keyboard_only, ps2data_raw
@@ -225,6 +227,8 @@ done:
 	jsr i2c_read_stop
 
 exit:
+    lda #<serialkbd_fetch_in_kvars
+    jsr kernext_call
 	KVARS_END
 	rts
 

@@ -11,7 +11,7 @@
 .import ps2data_kbd, ps2data_kbd_count
 .import uart_read_file
 
-.export serialkbd_init, serialkbd_fetch, serialkbd_fill_buffer, serialkbd_read_byte
+.export serialkbd_init, serialkbd_fetch_in_kvars, serialkbd_fetch, serialkbd_fill_buffer, serialkbd_read_byte
 
 .segment "BUFFER"
 .assert * = __KVEXTB0_START__, error, "BUFFER must be at the start of KVEXTB0"
@@ -231,6 +231,11 @@ serialkbd_read_byte:
 
 serialkbd_fetch:
     KVARS_START
+    jsr serialkbd_fetch_in_kvars
+    KVARS_END
+    rts
+
+serialkbd_fetch_in_kvars:
     jsr serialkbd_fill_buffer
 
     ;; let real PS/2 keyboard take precedence
@@ -249,5 +254,4 @@ serialkbd_fetch:
     sta ps2data_kbd_count
 
 @done:
-    KVARS_END
     rts
