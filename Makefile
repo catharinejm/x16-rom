@@ -530,3 +530,13 @@ $(BUILD_DIR)/rom_lst.h: $(BANK_BINS)
 	./scripts/trace_lst.py E $(BUILD_DIR)/x16edit-rom_E.rlst           >> $@
 	./scripts/trace_lst.py F $(BUILD_DIR)/basload-rom.rlst             >> $@
 	./scripts/trace_lst.py 10 `find build/x16/kernext/ -name \*.rlst`  >> $@
+
+.PHONY: flash
+
+flash: $(BUILD_DIR)/rom.bin
+	@echo
+ifeq (,$(FORCE))
+	@echo "*** FORCE is not set, no flash will be performed"
+else
+	minipro -p "SST39SF040" -w "$<" -s
+endif
