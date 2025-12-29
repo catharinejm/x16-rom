@@ -34,8 +34,12 @@ kbdbuf_clear:
 
 kbdbuf_peek:
 	KVARS_START
-	lda keyd
-	ldx ndx
+	php ; Disable IRQ
+	sei
+	lda keyd ; Get key
+	ldx ndx ; Get buffer count
+	plp ; Restore IRQ
+	cpx #0 ; If ndx=0 then Z=1 else Z=0
 	KVARS_END
 	rts
 
@@ -63,12 +67,15 @@ kbdbuf_get:
 kbdbuf_put:
 	KVARS_START
 	stx stkey
+	php
+	sei
 	ldx ndx    ; length of keyboard buffer
 	cpx #KBDBUF_SIZE
 	bcs :+     ; full, ignore
 	sta keyd,x ; store
 	inc ndx
-:	ldx stkey
+:	plp
+	ldx stkey
 	pha
 	cmp #3 ; stop
 	bne @1

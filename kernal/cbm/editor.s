@@ -51,6 +51,8 @@ MODIFIER_SHIFT = 1
 
 .export defcb
 
+.export extapi_blink_enable
+
 .import tpmcache, tpmflg
 
 ; screen driver
@@ -62,6 +64,7 @@ MODIFIER_SHIFT = 1
 .import screen_set_char
 .import screen_set_char_color
 .import screen_get_char_color
+.import screen_get_color_cont
 .import screen_set_position
 .import screen_get_position
 .import screen_copy_line
@@ -75,7 +78,8 @@ MODIFIER_SHIFT = 1
 .export color
 
 ; keyboard driver
-.import kbd_config, kbd_scan, kbdbuf_clear, kbdbuf_put, kbdbuf_get, kbd_remove, kbdbuf_get_modifiers, kbdbuf_get_stop
+.import kbd_config, kbd_scan, kbdbuf_clear, kbdbuf_put, kbdbuf_get, kbd_remove
+.import kbd_swap, kbdbuf_get_modifiers, kbdbuf_get_stop
 
 ; beep driver
 .import beep
@@ -719,10 +723,8 @@ prt
 
 @prt1:	pha
 	sta data
-	txa
-	pha
-	tya
-	pha
+	phx
+	phy
 	lda #0
 	sta crsw
 	ldy pntr
@@ -819,7 +821,22 @@ nc21	jsr screen_get_char
 nc23	iny
 	sty pntr        ;column
 	jsr screen_get_position
-	stx tblx        ;row
+	cpy lnmx
+	bcc nc24b
+	beq nc24b
+	stz pntr
+nc24a	inx
+	ldy ldtbl_byte,x
+	lda ldtbl_bit,x
+	and ldtb1,y     ;continued line?
+	beq nc24a       ;yes, increment again
+	cpx nlines
+	bcc nc24b
+	ldx nlinesm1
+	ldy llen
+	dey
+	sty pntr
+nc24b	stx tblx        ;row
 	jsr stupt       ;move cursor to tblx,pntr
 	jmp loop2
 nc25	cmp #$1d        ;CSR RIGHT
@@ -930,11 +947,17 @@ isosto	sta mode
 
 bell
 	cmp #$07        ;bell?
-	bne outhre      ;branch if not
+	bne swlay       ;branch if not
 	ldx #<1181      ; freq
 	ldy #>1181
 	lda #4          ; duration
 	jsr beep
+	jmp loop2
+
+swlay
+	cmp #$0b        ; (k)eyboard layout swap
+	bne outhre
+	jsr kbd_swap
 	jmp loop2
 
 ;shifted keys
@@ -1283,13 +1306,13 @@ cursor_blink:
 	lda #20         ;reset blink counter
 	sta blnct
 	ldy pntr        ;cursor position
+	ldx gdcol
+	jsr screen_get_char
 	lsr blnon       ;carry set if original char
-	php
-	jsr screen_get_char_color
-	inc blnon       ;set to 1
-	plp
 	bcs @1          ;branch if not needed
+	inc blnon       ;set to 1
 	sta gdbln       ;save original char
+	jsr screen_get_color_cont
 	stx gdcol       ;save original color
 	ldx color       ;blink in this color
 @1	bit mode
@@ -1325,16 +1348,20 @@ defcb: ; default basin callback vector
 	sec
 	rts
 
+extapi_blink_enable:
+	txa
+	bra cursor_set_blink
 clear_cursor:
 	lda #$FF
+cursor_set_blink:
 	sta blnsw
 	lda blnon
 	beq @1 ; rts
 	lda gdbln
 	ldy pntr
-	jsr screen_set_char
-	lda #0
-	sta blnon
+	ldx gdcol
+	jsr screen_set_char_color
+	stz blnon
 @1:	rts
 
 iso_cursor_char:
